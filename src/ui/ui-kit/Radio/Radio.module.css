@@ -1,0 +1,100 @@
+.input {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.decoration {
+  --border-color: var(--neutral-700);
+  --core-color: transparent;
+  --size: var(--radio-size, 16px);
+  --core-size: var(--radio-core-size, 8px);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+}
+
+.decoration::before {
+  content: '';
+  display: block;
+  width: var(--core-size);
+  height: var(--core-size);
+  /* position: absolute; */
+  border-radius: 50%;
+  background-color: var(--core-color);
+}
+
+.input:focus + .decoration,
+.label:hover .decoration {
+  --border-color: var(--primary);
+}
+
+.input:checked + .decoration {
+  --core-color: var(--primary);
+  --border-color: var(--primary);
+}
+
+.input:focus-visible + .decoration {
+  outline-offset: 1px;
+  outline: 2px solid var(--primary);
+  outline-style: double;
+}
+
+.cardDecoration {
+  position: relative;
+  border-radius: 20px;
+  cursor: pointer;
+  border: 2px solid var(--neutral-300);
+}
+
+.input:checked + .cardDecoration {
+  border: 2px solid var(--primary-200);
+  background-color: var(--primary-200);
+}
+
+.label:hover .input:not(:checked) + .cardDecoration {
+  border: 2px solid var(--neutral-100);
+  background-color: var(--neutral-100);
+}
+
+.input:focus-visible + .cardDecoration {
+  border: 2px solid var(--primary);
+}
+
+.circle {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--neutral-400);
+}
+
+.checkedCircle {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  width: 24px;
+  height: 24px;
+  display: none;
+}
+
+.input:checked + .cardDecoration .circle {
+  display: none;
+}
+
+.input:checked + .cardDecoration .checkedCircle {
+  display: block;
+  color: var(--primary);
+}

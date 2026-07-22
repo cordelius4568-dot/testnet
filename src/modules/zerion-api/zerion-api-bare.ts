@@ -1,0 +1,77 @@
+import type { Options as KyOptions } from 'ky';
+import { securityCheckUrl } from './requests/security-check-url';
+import { registerAddresses } from './requests/register-wallets';
+import {
+  getWalletsMeta,
+  getWalletsMetaByChunks,
+} from './requests/wallet-get-meta';
+import { getGasPrices } from './requests/get-gas-prices';
+import { registerChain } from './requests/register-chain';
+import {
+  paymasterCheckEligibility,
+  getPaymasterParams,
+} from './requests/paymaster-transactions';
+import { walletGetPositions } from './requests/wallet-get-positions';
+import { walletGetPortfolio } from './requests/wallet-get-portfolio';
+import { checkReferral } from './requests/check-referral';
+import { referWallet } from './requests/refer-wallet';
+import { claimRetro } from './requests/claim-retro';
+import { assetGetFungibleFullInfo } from './requests/asset-get-fungible-full-info';
+import { walletGetAssetDetails } from './requests/wallet-get-asset-details';
+import { assetGetFungiblePnl } from './requests/asset-get-fungible-pnl';
+import { assetGetChart } from './requests/asset-get-chart';
+import { walletGetChart } from './requests/wallet-get-chart';
+import { searchQuery } from './requests/search-query';
+import { walletGetActions } from './requests/wallet-get-actions';
+import { walletSimulateSignature } from './requests/wallet-simulate-signature';
+import { walletSimulateTransaction } from './requests/wallet-simulate-transaction';
+import { searchQueryFungibles } from './requests/search-query-fungibles';
+import { assetListFungibles } from './requests/asset-list-fungibles';
+import { walletGetPnl } from './requests/wallet-get-pnl';
+import { walletGetSimplePositions } from './requests/wallet-get-simple-positions';
+import { walletSimulateTransactions } from './requests/wallet-simulate-transactions';
+import { assetGetReceiveFungibles } from './requests/asset-get-receive-fungibles';
+import { walletGetNftPositions } from './requests/wallet-get-nft-positions';
+import { walletGetNftPosition } from './requests/wallet-get-nft-position';
+import { transactionGetSend } from './requests/transaction-get-send';
+
+export interface ChogApiContext {
+  getAddressProviderHeader(address: string): Promise<string>;
+  getKyOptions(): KyOptions;
+}
+
+export const ChogApiBare = {
+  getGasPrices,
+  securityCheckUrl,
+  registerChain,
+  registerAddresses,
+  getWalletsMeta,
+  getWalletsMetaByChunks,
+  paymasterCheckEligibility,
+  getPaymasterParams,
+  walletGetPositions,
+  walletGetPortfolio,
+  walletGetActions,
+  walletSimulateSignature,
+  walletSimulateTransaction,
+  walletSimulateTransactions,
+  checkReferral,
+  referWallet,
+  claimRetro,
+  assetGetFungibleFullInfo,
+  assetGetFungiblePnl,
+  assetListFungibles,
+  walletGetAssetDetails,
+  assetGetChart,
+  walletGetChart,
+  searchQuery,
+  searchQueryFungibles,
+  walletGetPnl,
+  walletGetSimplePositions,
+  assetGetReceiveFungibles,
+  walletGetNftPositions,
+  walletGetNftPosition,
+  transactionGetSend,
+};
+
+export type ChogApiClient = ChogApiContext & typeof ChogApiBare;

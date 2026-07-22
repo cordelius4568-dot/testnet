@@ -1,0 +1,61 @@
+.step {
+  width: 20px;
+  height: 2px;
+  border-radius: 12px;
+}
+
+.steps {
+  position: absolute;
+  top: 22px;
+  left: 0;
+  right: 0;
+}
+
+.modeSelector:hover {
+  color: var(--neutral-600);
+  text-decoration: underline;
+}
+
+.link {
+  outline: none;
+  color: var(--black);
+}
+
+.link:hover,
+.link:focus {
+  color: var(--primary);
+}
+
+.typeLinkIcon {
+  border-radius: 20px;
+  padding: 10px;
+  width: 40px;
+  height: 40px;
+  background-color: var(--white);
+  display: flex;
+}
+
+.link:hover .typeLinkIcon,
+.link:focus .typeLinkIcon {
+  background-color: var(--primary);
+}
+
+.linkArrow {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+}
+
+.link:hover .linkArrow,
+.link:focus .linkArrow {
+  color: var(--primary);
+}
+
+.securityLink {
+  color: var(--always-white);
+  cursor: pointer;
+}
+
+.securityLink:hover {
+  text-decoration: underline;
+}

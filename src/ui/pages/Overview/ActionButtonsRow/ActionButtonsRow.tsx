@@ -1,0 +1,139 @@
+import browser from 'webextension-polyfill';
+import type { ComponentPropsWithoutRef, ElementType } from 'react';
+import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import classNames from 'classnames';
+import { useQuery } from '@tanstack/react-query';
+import { UnstyledLink } from 'src/ui/ui-kit/UnstyledLink';
+import SendIcon from 'jsx:src/ui/assets/actions/send-2.svg';
+import ReceiveIcon from 'jsx:src/ui/assets/actions/qr-code.svg';
+import { UnstyledAnchor } from 'src/ui/ui-kit/UnstyledAnchor';
+import { walletPort } from 'src/ui/shared/channels';
+import { useWalletParams } from 'src/ui/shared/requests/useWalletParams';
+import { UIText } from 'src/ui/ui-kit/UIText';
+import { UnstyledButton } from 'src/ui/ui-kit/UnstyledButton';
+import { emitter } from 'src/ui/shared/events';
+import { useDialog2 } from 'src/ui/ui-kit/ModalDialogs/Dialog2';
+import { ReceiverAddressDialog } from 'src/ui/components/ReceiverAddressDialog';
+import { VStack } from 'src/ui/ui-kit/VStack';
+import * as s from './styles.module.css';
+
+const CHOG_ORIGIN = 'https://app.zerion.io';
+
+function ActionButton<As extends ElementType = 'a'>({
+  as,
+  icon,
+  title,
+  className,
+  ...props
+}: {
+  className?: string;
+  icon: React.ReactNode;
+  title: string;
+} & { as?: As } & ComponentPropsWithoutRef<As>) {
+  const Element = as || UnstyledAnchor;
+  return (
+    <Element {...props} className={classNames(s.actionButton, className)}>
+      <VStack gap={0} style={{ justifyItems: 'center' }}>
+        <div className={s.icon}>{icon}</div>
+        <UIText kind="caption/accent">{title}</UIText>
+      </VStack>
+    </Element>
+  );
+}
+
+function acceptOrigin(params: { address: string; origin: string }) {
+  return walletPort.request('acceptOrigin', params);
+}
+
+export function useOpenAndConnectToChog({
+  address,
+}: {
+  address: string | null;
+}) {
+  const { data: activeTabs } = useQuery({
+    queryKey: ['browser/activeTab'],
+    queryFn: () => browser.tabs.query({ active: true, currentWindow: true }),
+  });
+  const activeTab = activeTabs ? activeTabs[0] : null;
+  const handleAnchorClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (!address) {
+      return;
+    }
+    acceptOrigin({ origin: CHOG_ORIGIN, address });
+    const href = event.currentTarget.getAttribute('href');
+    const activeTabUrl = activeTab?.url ? new URL(activeTab.url) : null;
+    if (href && activeTab && activeTabUrl?.origin == CHOG_ORIGIN) {
+      event.preventDefault();
+      browser.tabs.update(activeTab.id, { url: href });
+    }
+  };
+  return { handleAnchorClick };
+}
+
+export function ActionButtonsRow() {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { data: wallet } = useQuery({
+    queryKey: ['wallet/uiGetCurrentWallet'],
+    queryFn: () => {
+      return walletPort.request('uiGetCurrentWallet');
+    },
+  });
+  const addWalletParams = useWalletParams(wallet);
+  const recipientDialog = useDialog2();
+
+  if (!addWalletParams || !wallet) {
+    return null;
+  }
+
+  const receiveButton = (
+    <ActionButton
+      title="Receive"
+      as={UnstyledLink}
+      icon={<ReceiveIcon />}
+      to={`/receive?address=${wallet.address}`}
+      onClick={() => {
+        emitter.emit('buttonClicked', {
+          buttonName: 'Receive Crypto',
+          buttonScope: 'General',
+          pathname,
+          walletAddress: wallet.address,
+        });
+      }}
+    />
+  );
+
+  const sendButton = (
+    <ActionButton
+      title="Send"
+      as={UnstyledButton}
+      icon={<SendIcon />}
+      onClick={() => recipientDialog.openDialog()}
+    />
+  );
+
+  return (
+    <div>
+      <ReceiverAddressDialog
+        open={recipientDialog.open}
+        onClose={recipientDialog.closeDialog}
+        title="Recipient"
+        onSelect={(address) => {
+          navigate(`/send-form?to=${address}`);
+        }}
+      />
+      <ul
+        className={s.list}
+        style={{
+          padding: 0,
+          margin: 0,
+          listStyle: 'none',
+        }}
+      >
+        <li>{receiveButton}</li>
+        <li>{sendButton}</li>
+      </ul>
+    </div>
+  );
+}

@@ -1,0 +1,87 @@
+import browser from 'webextension-polyfill';
+import { Loglevel, logTable, logToConsole } from 'src/shared/logger';
+import { version } from 'src/shared/packageVersion';
+import { detectBrowser } from 'src/modules/detect-browser/detect-browser';
+import { onIdle } from '../onIdle';
+
+type MetabaseEvent =
+  | 'screen_view'
+  | 'unlocked_app_opened'
+  | 'dapp_connection'
+  | 'signed_message'
+  | 'signed_transaction'
+  | 'swap_form_filled_out'
+  | 'client_error'
+  | 'daylight_action'
+  | 'custom_evm_network_created'
+  | 'network_search'
+  | 'error_screen_view'
+  | 'metamask_mode'
+  | 'loader_screen_view'
+  | 'eip_6963_support'
+  | 'add_wallet'
+  | 'background_script_reloaded'
+  | 'hold_to_sign_prerefence'
+  | 'keyboard_shortcut_to_sign_preference'
+  | 'cloudflare_challenge_issued'
+  | 'button_clicked'
+  | 'banner_clicked'
+  | 'asset_clicked'
+  | 'passkey_login_enabled'
+  | 'passkey_login_disabled'
+  | 'password_change_success'
+  | 'password_change_error'
+  | 'mnemonic_restoration_shown'
+  | 'mnemonic_restoration_success'
+  | 'mnemonic_restoration_error'
+  | 'report_ledger_error'
+  | 'perps_screen_viewed'
+  | 'perps_button_pressed'
+  | 'perps_position_action';
+
+type BaseParams<E = MetabaseEvent> = { request_name: E };
+
+export function sendToMetabase<
+  E extends MetabaseEvent,
+  T extends BaseParams<E>
+>(event: E, params: T) {
+  logToConsole(Loglevel.info, 'group', `Metabase: ${params.request_name}`);
+  logTable(Loglevel.info, params);
+  logToConsole(Loglevel.info, 'groupEnd');
+  if (process.env.NODE_ENV !== 'development') {
+    onIdle(() => {
+      fetch(`https://event-collector.zerion.io/${event}/`, {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+  }
+}
+
+let os: browser.Runtime.PlatformOs | null = null;
+async function readOs() {
+  const info = await browser.runtime.getPlatformInfo();
+  os = info.os;
+}
+readOs();
+
+const detectedBrowser = detectBrowser(globalThis.navigator.userAgent);
+const browserInfo = [detectedBrowser.browser, detectedBrowser.version].join(
+  ' '
+);
+
+export function createParams<T extends BaseParams>(data: T) {
+  return {
+    platform: os,
+    // we use os_version for compatibility with mobile platforms
+    os_version: browserInfo,
+    browser_info: globalThis.navigator.userAgent,
+    api_client_name: 'Chog Extension',
+    origin: globalThis.location.origin,
+    timestamp: new Date().toISOString(),
+    wallet_provider: 'Chog Wallet',
+    app_version: version,
+    ...data,
+  };
+}

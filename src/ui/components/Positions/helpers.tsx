@@ -1,0 +1,87 @@
+/**
+ * Taken and adapted from pulse-frontend/Root/App/Main/tabs/Overview/Positions/helpers.ts
+ */
+import type { AddressPosition, PositionType } from 'defi-sdk';
+import { baseToCommon } from 'src/shared/units/convert';
+import { getDecimals } from 'src/modules/networks/asset';
+import { createChain } from 'src/modules/networks/Chain';
+import BigNumber from 'bignumber.js';
+import type { AggregatedAddressPosition } from './types';
+
+export type ProtocolFrameColumns = 'price' | 'apy' | 'balance' | 'value' | '';
+
+export const positionTypeToStringMap: Record<PositionType, string> = {
+  asset: '',
+  deposit: 'Deposited',
+  loan: 'Debt',
+  reward: 'Reward',
+  staked: 'Staking',
+  locked: 'Locked',
+};
+
+export function getPositionValue(position: AddressPosition) {
+  return Number(position.value) || 0;
+}
+
+export function getPositionBalance(
+  position:
+    | Pick<AddressPosition, 'asset' | 'quantity' | 'chain'>
+    | Pick<AggregatedAddressPosition, 'normalizedQuantity'>
+) {
+  if ('normalizedQuantity' in position) {
+    return new BigNumber(position.normalizedQuantity);
+  }
+  return baseToCommon(
+    position.quantity || 0,
+    getDecimals({
+      asset: position.asset,
+      chain: createChain(position.chain),
+    })
+  );
+}
+
+export function getPositionPartialBalance(
+  position: Pick<AddressPosition, 'asset' | 'quantity' | 'chain'>,
+  factor: number
+) {
+  if (factor === 1) {
+    // no need to round value for MAX balance request
+    return getPositionBalance(position);
+  }
+  const rawValue = baseToCommon(
+    new BigNumber(position.quantity || 0).multipliedBy(factor).integerValue(),
+    getDecimals({
+      asset: position.asset,
+      chain: createChain(position.chain),
+    })
+  );
+  return rawValue.gt(100)
+    ? rawValue.dp(0, BigNumber.ROUND_DOWN)
+    : rawValue.precision(3, BigNumber.ROUND_DOWN);
+}
+
+// we need to sum up all values, except loan values
+export function getFullPositionsValue(positions?: AddressPosition[] | null) {
+  return positions
+    ? positions.reduce(
+        (acc, item) =>
+          item.type === 'loan'
+            ? acc - getPositionValue(item)
+            : acc + getPositionValue(item),
+        0
+      )
+    : 0;
+}
+
+export function getFullPositionsBalance(positions?: AddressPosition[] | null) {
+  const zero = new BigNumber(0);
+  return positions
+    ? positions.reduce(
+        (acc, position) =>
+          position.type === 'loan'
+            ? acc.minus(getPositionBalance(position))
+            : acc.plus(getPositionBalance(position)),
+        zero
+      )
+    : zero;
+}

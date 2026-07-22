@@ -1,0 +1,121 @@
+.wrap {
+  border-bottom: 1px solid var(--neutral-300);
+  display: flex;
+  position: relative;
+}
+.wrap.secondary {
+  border: 1px solid var(--neutral-300);
+  background-color: var(--neutral-300);
+  border-radius: 8px;
+  display: flex;
+}
+
+.wrap:focus-within:focus-visible {
+  box-shadow: 0 0 0px 1px var(--white), 0 0 0px 3px var(--primary);
+}
+
+.wrap.spreadChildrenEvenly > * {
+  flex: 1;
+}
+
+.radio,
+.link {
+  position: relative;
+  text-align: center;
+  cursor: pointer;
+  padding-bottom: 8px;
+  text-decoration: none;
+  color: var(--neutral-500);
+}
+
+.wrap.primary .radio.radioChecked,
+.wrap.primary .link.activeLink {
+  color: var(--black);
+}
+
+.radio:focus-within:has(:focus-visible) {
+  outline: 1px solid var(--primary);
+}
+
+.wrap.secondary .radio,
+.wrap.secondary .link {
+  padding-bottom: 0;
+  height: 32px;
+  white-space: nowrap; /* since we restrict height, we should restrict wrapping, too */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  padding-left: 12px;
+  padding-right: 12px;
+  color: var(--black);
+}
+
+.activeDecorator {
+  color: transparent;
+  height: 1px;
+  background-color: currentColor;
+}
+.wrap.secondary .activeDecorator {
+  padding: 0 16px;
+  top: 2px;
+  bottom: 2px;
+  right: 2px;
+  left: 2px;
+  border-radius: 6px;
+  z-index: -1;
+  height: calc(100% - 4px);
+}
+
+.radio > .activeDecorator,
+.link > .activeDecorator {
+  position: absolute;
+  bottom: -1px;
+  width: 100%;
+}
+.wrap.secondary .radio > .activeDecorator {
+  bottom: 2px;
+  width: calc(100% - 4px);
+}
+
+.radio:hover,
+.radio:focus-within,
+.link:hover {
+  color: var(--black);
+}
+
+.wrap.secondary .radio:hover .activeDecorator,
+.wrap.secondary .radio:focus-within .activeDecorator {
+  color: var(--neutral-100);
+}
+
+.wrap.primary .activeLink > .activeDecorator,
+.wrap.primary .input:checked + .activeDecorator {
+  color: var(--black);
+  height: 2px;
+}
+
+.wrap.secondary .activeLink + .activeDecorator,
+.wrap.secondary .input:checked + .activeDecorator {
+  color: var(--white);
+}
+
+.radioDisabled,
+.radioDisabled:hover,
+.radioDisabled:focus-within {
+  cursor: not-allowed;
+  opacity: 0.6;
+  color: var(--neutral-400);
+}
+
+.hidden {
+  opacity: 0;
+}
+
+.input {
+  position: absolute;
+  bottom: 0;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}

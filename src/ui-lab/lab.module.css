@@ -1,0 +1,12 @@
+body,
+:global(.ui-lab) {
+  background-color: transparent;
+  width: auto;
+}
+
+body {
+  font-family: 'Aeonik Pro', sans-serif;
+  font-size: 14px;
+  line-height: calc(20 / 14);
+  color: var(--black);
+}

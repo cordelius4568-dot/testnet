@@ -1,0 +1,48 @@
+.root {
+  --highlight-color: var(--neutral-100);
+}
+
+@container style(--color-scheme: dark) {
+  .root {
+    --highlight-color: var(--neutral-200);
+  }
+}
+
+.option {
+  width: 100%;
+  display: block;
+  padding-block: 0;
+  padding-inline: 8px;
+  text-align: start;
+}
+
+.noSeparator .option {
+  padding-block: 0px;
+}
+
+.noSeparator .decoration {
+  padding-block: 8px;
+}
+
+.decoration {
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.option.highlighted .decoration {
+  background-color: var(--highlight-color);
+}
+
+@media (hover: hover) {
+  .option:hover .decoration {
+    background-color: var(--highlight-color);
+  }
+}
+
+.option {
+  outline: none;
+}
+
+.option:focus:focus-visible .decoration {
+  background-color: var(--highlight-color);
+}

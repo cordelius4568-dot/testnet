@@ -1,0 +1,147 @@
+import React, { useState } from 'react';
+import RocketOutlineIcon from 'jsx:src/ui/assets/rocket-outline.svg';
+import RocketSrc from 'url:src/ui/assets/rocket.png';
+import Rocket2xSrc from 'url:src/ui/assets/rocket@2x.png';
+import CancelEmojiSrc from 'url:src/ui/assets/cancel-emoji.png';
+import CancelEmoji2xSrc from 'url:src/ui/assets/cancel-emoji@2x.png';
+import { Button } from 'src/ui/ui-kit/Button';
+import { CircleSpinner } from 'src/ui/ui-kit/CircleSpinner';
+import { HStack } from 'src/ui/ui-kit/HStack';
+import { UIText } from 'src/ui/ui-kit/UIText';
+import { VStack } from 'src/ui/ui-kit/VStack';
+import type { LocalAddressAction } from 'src/modules/ethereum/transactions/addressAction';
+import { isLocalAddressAction } from 'src/modules/ethereum/transactions/addressAction';
+import { walletPort } from 'src/ui/shared/channels';
+import { useQuery } from '@tanstack/react-query';
+import { ViewLoadingSuspense } from 'src/ui/components/ViewLoading/ViewLoading';
+import { SpeedUp } from './SpeedUp';
+import { CancelTx } from './CancelTx';
+import { isCancelTx } from './shared/accelerate-helpers';
+
+export function AccelerateTransaction({
+  addressAction,
+  onSuccess,
+}: {
+  addressAction: LocalAddressAction;
+  onSuccess: () => void;
+}) {
+  const [view, setView] = useState<'speedup' | 'cancel' | 'default'>('default');
+  const { data: wallet, isLoading } = useQuery({
+    queryKey: ['wallet/uiGetCurrentWallet'],
+    queryFn: () => walletPort.request('uiGetCurrentWallet'),
+    useErrorBoundary: true,
+  });
+  if (isLoading || !wallet) {
+    return null;
+  }
+  const isAccelerated =
+    isLocalAddressAction(addressAction) && addressAction.relatedTransaction;
+  const isCancel = isCancelTx(addressAction);
+  const disabled =
+    !addressAction.transaction ||
+    addressAction.transaction.chain.id === 'solana';
+  return view === 'default' ? (
+    <>
+      <VStack gap={16}>
+        {disabled ? null : (
+          <div
+            style={{
+              borderRadius: 12,
+              backgroundColor: 'var(--white)',
+              padding: 16,
+            }}
+          >
+            <VStack gap={16}>
+              <HStack gap={8} justifyContent="space-between">
+                <HStack gap={8} alignItems="center">
+                  <CircleSpinner />
+                  <UIText kind="body/regular">
+                    {isCancel
+                      ? 'Transaction cancelling...'
+                      : 'Transaction pending...'}
+                  </UIText>
+                </HStack>
+                {isAccelerated && !isCancel ? (
+                  <HStack gap={8}>
+                    <UIText kind="body/regular" color="var(--neutral-600)">
+                      Accelerated
+                    </UIText>
+                    <RocketOutlineIcon
+                      style={{
+                        color: 'var(--neutral-500)',
+                        width: 24,
+                        height: 24,
+                      }}
+                    />
+                  </HStack>
+                ) : null}
+              </HStack>
+              <HStack gap={8} style={{ gridTemplateColumns: '1fr 1fr' }}>
+                <Button
+                  kind="primary"
+                  onClick={() => setView('speedup')}
+                  style={{ paddingInline: 6 }}
+                >
+                  <HStack gap={8} justifyContent="center">
+                    <img
+                      alt=""
+                      style={{ width: 20, height: 20 }}
+                      src={RocketSrc}
+                      srcSet={`${RocketSrc}, ${Rocket2xSrc} 2x`}
+                    />
+                    Speed Up
+                  </HStack>
+                </Button>
+                <Button kind="neutral" onClick={() => setView('cancel')}>
+                  <HStack gap={8} justifyContent="center">
+                    <img
+                      alt=""
+                      style={{ width: 20, height: 20 }}
+                      src={CancelEmojiSrc}
+                      srcSet={`${CancelEmojiSrc}, ${CancelEmoji2xSrc} 2x`}
+                    />
+                    Cancel
+                  </HStack>
+                </Button>
+              </HStack>
+            </VStack>
+          </div>
+        )}
+      </VStack>
+    </>
+  ) : view === 'speedup' ? (
+    <ViewLoadingSuspense>
+      <div
+        style={{
+          borderRadius: 12,
+          backgroundColor: 'var(--white)',
+          padding: 16,
+        }}
+      >
+        <SpeedUp
+          wallet={wallet}
+          addressAction={addressAction}
+          onDismiss={() => setView('default')}
+          onSuccess={onSuccess}
+        />
+      </div>
+    </ViewLoadingSuspense>
+  ) : view === 'cancel' ? (
+    <ViewLoadingSuspense>
+      <div
+        style={{
+          borderRadius: 12,
+          backgroundColor: 'var(--white)',
+          padding: 16,
+        }}
+      >
+        <CancelTx
+          wallet={wallet}
+          addressAction={addressAction}
+          onDismiss={() => setView('default')}
+          onSuccess={onSuccess}
+        />
+      </div>
+    </ViewLoadingSuspense>
+  ) : null;
+}

@@ -1,0 +1,65 @@
+import { invariant } from 'src/shared/invariant';
+import type { ClientOptions } from '../shared';
+import { CLIENT_DEFAULTS, ChogHttpClient } from '../shared';
+import type { ChogApiContext } from '../zerion-api-bare';
+import type { ResponseBody } from './ResponseBody';
+
+export interface Params {
+  addresses: string[];
+  currency: string;
+  nftPriceType?: 'not_included';
+}
+
+export interface WalletPortfolio {
+  positionsTypesDistribution: {
+    assets: number;
+    deposited: number;
+    borrowed: number;
+    locked: number;
+    staked: number;
+  };
+  positionsChainsDistribution: Record<string, number>;
+  nfts: {
+    lastPrice: number;
+    floorPrice: number;
+  };
+  nftChainsDistribution: Record<string, number>;
+  change24h: {
+    absolute: number;
+    relative: number;
+  };
+  totalValue: number;
+  chains: Record<
+    string,
+    {
+      id: string;
+      explorerTxUrl: string | null;
+      iconUrl: string | null;
+      testnet: boolean;
+      name: string;
+    }
+  >;
+}
+
+type Response = ResponseBody<WalletPortfolio>;
+
+export async function walletGetPortfolio(
+  this: ChogApiContext,
+  params: Params,
+  options: ClientOptions = CLIENT_DEFAULTS
+) {
+  invariant(params.addresses.length > 0, 'Addresses param is empty');
+  const firstAddress = params.addresses[0];
+  const provider = await this.getAddressProviderHeader(firstAddress);
+  const kyOptions = this.getKyOptions();
+  const endpoint = 'wallet/get-portfolio/v1';
+  return ChogHttpClient.post<Response>(
+    {
+      endpoint,
+      body: JSON.stringify(params),
+      headers: { 'Chog-Wallet-Provider': provider },
+      ...options,
+    },
+    kyOptions
+  );
+}

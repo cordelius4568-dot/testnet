@@ -1,0 +1,74 @@
+import React, { useMemo } from 'react';
+import type { AnyAddressAction } from 'src/modules/ethereum/transactions/addressAction';
+import { VStack } from 'src/ui/ui-kit/VStack';
+import type { NetworkConfig } from 'src/modules/networks/NetworkConfig';
+import { applyCustomAllowance } from 'src/modules/ethereum/transactions/appovals';
+import { RecipientLine } from '../RecipientLine';
+import { ApplicationLine } from '../ApplicationLine';
+import { ActInfo } from '../ActInfo';
+
+export function AddressActionDetails({
+  address,
+  addressAction,
+  network,
+  allowanceQuantityCommon,
+  customAllowanceQuantityBase,
+  showApplicationLine,
+  singleAssetElementEnd,
+}: {
+  address: string;
+  addressAction?: AnyAddressAction;
+  network: NetworkConfig;
+  allowanceQuantityCommon: string | null;
+  customAllowanceQuantityBase: string | null;
+  showApplicationLine: boolean;
+  singleAssetElementEnd: React.ReactNode;
+}) {
+  const recipientAddress = addressAction?.label?.wallet?.address;
+  const applicationLineVisible =
+    showApplicationLine && addressAction?.label?.contract && !recipientAddress;
+
+  const actionWithAppliedAllowance = useMemo(
+    () =>
+      applyCustomAllowance({
+        addressAction,
+        customAllowanceQuantityCommon: allowanceQuantityCommon,
+        customAllowanceQuantityBase,
+      }),
+    [addressAction, allowanceQuantityCommon, customAllowanceQuantityBase]
+  );
+
+  const showEndElement =
+    addressAction?.acts?.length === 1 &&
+    !addressAction.acts[0].content?.transfers &&
+    addressAction.acts[0].content?.approvals?.length === 1;
+
+  return (
+    <>
+      {recipientAddress ? (
+        <RecipientLine
+          recipientAddress={recipientAddress}
+          recipientName={addressAction.label?.wallet?.name || null}
+          showNetworkIcon={!applicationLineVisible}
+          network={network}
+        />
+      ) : null}
+      {applicationLineVisible ? (
+        <ApplicationLine addressAction={addressAction} network={network} />
+      ) : null}
+      {actionWithAppliedAllowance?.acts?.length ? (
+        <VStack gap={4}>
+          {actionWithAppliedAllowance.acts.map((act, index) => (
+            <ActInfo
+              key={index}
+              address={address}
+              act={act}
+              elementEnd={showEndElement ? singleAssetElementEnd : null}
+              initialDelay={300 * index}
+            />
+          ))}
+        </VStack>
+      ) : null}
+    </>
+  );
+}

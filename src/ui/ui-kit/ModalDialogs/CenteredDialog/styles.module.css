@@ -1,0 +1,29 @@
+@keyframes appear {
+  from {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.appear {
+  will-change: transform, opacity;
+  animation: appear 150ms;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dialog::backdrop {
+  animation: fadeIn 150ms linear;
+  background: rgba(0, 0, 0, 0.6);
+}

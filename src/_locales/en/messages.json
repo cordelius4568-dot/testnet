@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "Chog Wallet: Crypto Wallet",
+    "description": "The name of the application"
+  },
+  "appDescription": {
+    "message": "Trade, track, and explore crypto on Monad Testnet and Monad Mainnet. Manage it all in one wallet",
+    "description": "The description of the application"
+  }
+}
