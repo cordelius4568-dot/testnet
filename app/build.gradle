@@ -100,10 +100,16 @@ android {
 
     signingConfigs {
         debug {
-            storeFile file('C:/Users/soyle/Downloads/debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
+            // Allow CI or local override for the debug keystore. If CI_DEBUG_KEYSTORE is set use that,
+            // otherwise look for app/debug.keystore. If neither exists, leave signing config empty so
+            // the Android Gradle plugin uses its default debug keystore.
+            def ciKeystore = System.getenv('CI_DEBUG_KEYSTORE') ?: "${rootProject.projectDir}/app/debug.keystore"
+            if (file(ciKeystore).exists()) {
+                storeFile file(ciKeystore)
+                storePassword 'android'
+                keyAlias 'androiddebugkey'
+                keyPassword 'android'
+            }
         }
         release {
             // Add below 4 properties into ~/.gradle/gradle.properties
@@ -143,7 +149,7 @@ android {
             useLegacyPackaging true
         }
         resources {
-            excludes += ['META-INF/NOTICE', 'META-INF/LICENSE', 'META-INF/LICENSE.md', 'META-INF/NOTICE.md', 'META-INF/LICENSE-notice.md', 'solidity/ens/build/*.bin', 'solidity/ens/*.sol', 'solidity/ens/build/*.abi', 'solidity/*', 'META-INF/versions/9/OSGI-INF/MANIFEST.MF']
+            excludes += ['META-INF/NOTICE', 'META-INF/LICENSE', 'META-INF/LICENSE.md', 'META-INF/NOTICE.md', 'META-INF/LICENSE-notice.md', 'solidity/ens/build/*.bin', 'solidity/ens/*.sol', 'solid[...]'
         }
     }
     compileOptions {
