@@ -23,7 +23,7 @@
 
     -->
     <!-- ?colorPrimary -->
-    <color name="brand">@color/rose</color>
+    <color name="brand">@color/azure</color>
     <!-- ?colorOnPrimary -->
     <color name="brand_inverse">@color/white</color>
     <!-- ?colorAccent -->
@@ -33,7 +33,7 @@
     <!-- ?colorOnError -->
     <color name="error_inverse">@color/white</color>
     <!-- ?android:colorBackground -->
-    <color name="background">@color/cream</color>
+    <color name="background">@color/white</color>
     <!-- ?colorOnBackground -->
     <color name="background_inverse">@color/black</color>
     <!-- ?colorSurface -->

@@ -1235,7 +1235,7 @@ public class Utils
 
     public static boolean isAlphaWallet(Context context)
     {
-        return context.getPackageName().equals("com.chog.wallet");
+        return context.getPackageName().equals("io.stormbird.wallet");
     }
 
     //Decode heuristic:

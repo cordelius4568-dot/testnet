@@ -1482,6 +1482,16 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private boolean loadUrl(String urlText)
     {
         requireContext();
+        // ensure the URL is whitelisted, that is it is featured in the dapp list, and check if the app is in developer override mode
+        if (!viewModel.getDeveloperOverrideState(getContext()) && !DappBrowserUtils.isInDappsList(this.getContext(), urlText))
+        {
+            //reset url string back to AlphaWallet
+            setUrlText(ALPHAWALLET_WEB);
+
+            //display a warning dialog
+            displayError(R.string.title_dialog_error, R.string.not_recommended_to_visit);
+            return false;
+        }
 
         detachFragments();
         addToBackStack(DAPP_BROWSER);

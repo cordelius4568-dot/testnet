@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -39,6 +40,7 @@ import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
+import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.web3.OnSetValuesListener;
@@ -793,6 +795,18 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         else handler.post(progressOff);
     }
 
+    private void urlNotWhiteListed(String url)
+    {
+        hideDialog();
+        alertDialog = new AWalletAlertDialog(this);
+        alertDialog.setIcon(AWalletAlertDialog.ERROR);
+        alertDialog.setTitle(R.string.error_not_whitelisted);
+        alertDialog.setMessage(getString(R.string.explain_not_whitelisted, url));
+        alertDialog.setButtonText(R.string.button_ok);
+        alertDialog.setButtonListener(v ->alertDialog.dismiss());
+        alertDialog.show();
+    }
+
     private void openInDappBrowser(String url)
     {
         Intent intent = new Intent(FunctionActivity.this, HomeActivity.class);
@@ -805,7 +819,20 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         if (!TextUtils.isEmpty(url))
         {
-            openInDappBrowser(url);
+            //try one of the whitelisted URL's and open in dapp browser
+            List<DApp> myDapps = DappBrowserUtils.getDappsList(getApplicationContext());
+            for (DApp thisDapp : myDapps)
+            {
+                //must start with the whitelisted URL, to avoid simply adding the URL as a param
+                if (url.startsWith(thisDapp.getUrl()))
+                {
+                    openInDappBrowser(url);
+                    return true;
+                }
+            }
+
+            //not whitelisted
+            urlNotWhiteListed(url);
         }
 
         return true;
